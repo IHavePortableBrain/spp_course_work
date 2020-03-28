@@ -63,7 +63,7 @@ var JustSendingApp = {
         var $form = $("#form");
 
         $text.keypress(function (e) {
-            if (e.which == 13 && e.ctrlKey) {
+            if ((e.which == 13 || e.which == 10) && e.ctrlKey) {
                 $('#sendBtn').trigger("click");
                 return false;
             }
@@ -87,6 +87,7 @@ var JustSendingApp = {
                 }
                 $text.val(file.name);
                 $text.attr("readonly", "readonly");
+                $clearBtn.show();                
             } else {
                 $clearBtn.trigger("click");
             }
@@ -144,7 +145,7 @@ var JustSendingApp = {
             } else {
                 $el.css("display", "none");
 
-                if (!$("#share-panel").is(":visible")) {
+                if (!$(".share-panel").is(":visible")) {
                     swal({
                         title: "Nobody to share to.",
                         text: "Click 'Connect Another Device' to allow other device to connect securely using a PIN.",
@@ -160,10 +161,12 @@ var JustSendingApp = {
 
         $("#shareBtn").on("click", function () {
             hub.server.share();
+            return false;
         });
 
         $(".cancelShareBtn").on("click", function () {
             hub.server.cancelShare();
+            return false;
         });
 
         $("#deleteBtn").on("click", function () {
@@ -181,7 +184,9 @@ var JustSendingApp = {
                 hub.server.eraseSession();
 
                 swal("Erasing...", "You will be taken to the homepage when it's done.", "success");
-            });
+                });
+            
+            return false;
         });
 
         $.connection
@@ -193,8 +198,8 @@ var JustSendingApp = {
     },
 
     switchView: function (showSharePanel) {
-        var $sharePanel = $("#share-panel");
-        var $shareActions = $("#share-actions");
+        var $sharePanel = $(".share-panel");
+        var $shareActions = $(".share-actions");
 
         if (showSharePanel) {
             $sharePanel.slideDown(500);
