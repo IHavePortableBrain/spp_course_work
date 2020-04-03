@@ -17,7 +17,14 @@
         that.initAutoSizeComposer();
 
         $("*[title]").tooltip();
+        $("a.navbar-brand").on("click", function () {
+            JustSendingApp.goHome();
+            return false;
+        });
 
+        window.onbeforeunload = function(event) {
+            JustSendingApp.goHome();
+        };
     },
 
     initPermalink: function (then) {
@@ -416,7 +423,7 @@
         };
 
         hub.client.sessionDeleted = function () {
-            window.location.href = "/";
+            JustSendingApp.goHome();
         };
 
         hub.client.setNumberOfDevices = function (num) {
@@ -488,6 +495,10 @@
             });
     },
 
+    goHome: function() {
+        window.location.replace("/");
+    },
+
     switchView: function (showSharePanel) {
         var $sharePanel = $(".share-panel");
         var $shareActions = $(".share-actions");
@@ -501,7 +512,18 @@
         }
     },
 
+    loadMessageInProgress: false,
+    loadMessageTimer: null,
+
     loadMessages: function (then) {
+        if (this.loadMessageInProgress) {
+            this.loadMessageTimer = setTimeout(function () { JustSendingApp.loadMessages(); }, 500);
+            return;
+        }
+
+        this.loadingMessage = true;
+        clearTimeout(this.loadMessageTimer);
+
         var id = $("#SessionId").val();
         var id2 = $("#SessionVerification").val();
         var from = parseInt($(".msg-c:first").data("seq"));
@@ -526,6 +548,7 @@
                 JustSendingApp.initViewSource();
 
                 if (then != undefined) then();
+                JustSendingApp.loadMessageInProgress = false;
 
             },
             true,
