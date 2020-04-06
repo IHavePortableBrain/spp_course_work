@@ -52,7 +52,11 @@ namespace JustALink
 
             app.UseStaticFiles();
             app.UseWebSockets();
-            app.UseSignalR();
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<ConversationHub>("/signalr/hubs");
+            });
+            
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
