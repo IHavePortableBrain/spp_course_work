@@ -21,6 +21,22 @@ var SecureLine = {
             throw "onLineSecured callback function must be defined.";
         }
 
+        var getLocation = function (href) {
+            var l = document.createElement("a");
+            l.href = href;
+            return l;
+        };
+
+        if (document.currentScript) {
+            var loc = getLocation(document.currentScript.src);
+            this.hostname = loc.protocol + "//" + loc.hostname;
+
+            if (loc.port != 80 && loc.port != 443) {
+                this.hostname += ":" + loc.port;
+            }
+        }
+
+
         var secure_line = this;
 
         secure_line.on_event = onEvent;
