@@ -1,6 +1,6 @@
 var SecureLine = {
-    webSockerConnection: null,
-    hostname: "https://justa.ml",
+    sockConnection: null,
+    hostname: "https://just-an-email.com",
     private_key: null,
     on_event: null,
     on_line_secured: null,
@@ -21,22 +21,6 @@ var SecureLine = {
             throw "onLineSecured callback function must be defined.";
         }
 
-        var getLocation = function (href) {
-            var l = document.createElement("a");
-            l.href = href;
-            return l;
-        };
-
-        if (document.currentScript) {
-            var loc = getLocation(document.currentScript.src);
-            this.hostname = loc.protocol + "//" + loc.hostname;
-
-            if (loc.port != 80 && loc.port != 443) {
-                this.hostname += ":" + loc.port;
-            }
-        }
-
-
         var secure_line = this;
 
         secure_line.on_event = onEvent;
@@ -46,10 +30,10 @@ var SecureLine = {
             Log("Dependencies loaded");
 
             var ws = new signalR.HubConnectionBuilder()
-                .withUrl("/signalr/secure-line")
+                .withUrl(secure_line.hostname + "/signalr/secure-line")
                 .build();
 
-            secure_line.webSockerConnection = ws;
+            secure_line.sockConnection = ws;
 
             ws.on("Boradcast", function (event, data) {
                 Log(event);
@@ -149,7 +133,7 @@ var SecureLine = {
             success: function (response) {
                 console.log(response);
 
-                SecureLine.webSockerConnection.send("Broadcast", "GET", response, false);
+                SecureLine.sockConnection.send("Broadcast", "GET", response, false);
             }
         });
     },
@@ -171,7 +155,7 @@ var SecureLine = {
         var app = this;
 
         app.includeJs(window.jQuery, "https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js", "sha256-wS9gmOZBqsqWxgIVgA8Y9WcQOa7PgSIX+rPA0VL2rbQ=", function () {
-            app.includeJs(window.signalR, "https://cdn.jsdelivr.net/npm/@aspnet/signalr@1.0.0/dist/browser/signalr.min.js", "sha256-DeOex/tR7FzkV208FN2wnFJvIUIKXWsVjbW0171naJo=", function () {
+            app.includeJs(window.signalR, "https://cdn.jsdelivr.net/npm/@aspnet/signalr@1.0.4/dist/browser/signalr.min.js", "sha256-51sQPE7Pj6aicVoT5i+HOaNgW7s+3i9xGiEUCwhVvVM=", function () {
                 app.includeJs(window.BigNumber, "https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/4.0.4/bignumber.min.js", "sha256-MomdVZFkolQP//Awk1YjBtrVF1Dehp9OlWj5au4owVo=", function () {
                     app.includeJs(window.sjcl, "https://cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.7/sjcl.min.js", "sha256-dFf9Iqsg4FM3OHx2k9aK6ba1l28881fMWFjhMV9MB4c=", function () {
                         app.includeJs(window.EndToEndEncryption, app.hostname + "/js/JustEncrypt.js", null, function () {

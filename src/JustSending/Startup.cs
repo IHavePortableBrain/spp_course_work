@@ -46,6 +46,7 @@ namespace JustALink
             services.AddTransient<BackgroundJobScheduler>();
 
             services.AddHangfire(x => x.UseLiteDbStorage(Helper.BuildDbConnectionString("BackgroundJobs", _hostingEnvironment)));
+            services.AddHealthChecks();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -60,6 +61,18 @@ namespace JustALink
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            app.UseHealthChecks("/api/test");
+
+            app.UseCors(c =>
+            {
+                c
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowAnyOrigin()
+                    .AllowCredentials()
+                    .Build();
+            });
+
             app.UseStaticFiles();
             app.UseWebSockets();
             app.UseSignalR(routes =>
@@ -67,11 +80,11 @@ namespace JustALink
                 routes.MapHub<ConversationHub>("/signalr/hubs");
                 routes.MapHub<SecureLineHub>("/signalr/secure-line");
             });
-            
+
             app.UseHangfireServer();
             app.UseHangfireDashboard("/jobs", new DashboardOptions
             {
-                Authorization = new[] {new CookieAuthFilter(Configuration["HangfireToken"])}
+                Authorization = new[] { new CookieAuthFilter(Configuration["HangfireToken"]) }
             });
 
             app.UseMvc(routes =>
@@ -93,11 +106,11 @@ namespace JustALink
         }
         public bool Authorize(DashboardContext context)
         {
-            #if DEBUG
+#if DEBUG
             return true;
-            #endif
-            
-            return context.GetHttpContext().Request.Cookies.TryGetValue("HangfireToken", out var tokenFromCookie) 
+#endif
+
+            return context.GetHttpContext().Request.Cookies.TryGetValue("HangfireToken", out var tokenFromCookie)
                    && tokenFromCookie == _token;
         }
     }
