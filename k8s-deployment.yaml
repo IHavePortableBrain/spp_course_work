@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: justaml
@@ -8,6 +8,9 @@ spec:
     rollingUpdate:
       maxUnavailable: 25%
       maxSurge: 1
+  selector:
+    matchLabels:
+      app: justaml-app
   revisionHistoryLimit: 2
   template:
     metadata:
@@ -80,7 +83,7 @@ metadata:
 spec:
   ports:
     - name: https
-      port: 443
+      port: 80
       targetPort: 3000
   selector:
     app: justaml-app
@@ -94,14 +97,12 @@ metadata:
 spec:
   tls:
   - hosts:
-    - beta.justa.ml
-    - beta.just-an-email.com
+    - justa.ml
   backend:
     serviceName: justaml-service
-    servicePort: 443
+    servicePort: 80
   rules:
-    - host: beta.justa.ml
-    - host: beta.just-an-email.com
+    - host: justa.ml
 ---
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
